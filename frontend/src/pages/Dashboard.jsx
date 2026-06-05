@@ -120,7 +120,7 @@ export default function Dashboard() {
             threatLevel === 'HIGH' ? 'bg-amber-500' :
             threatLevel === 'MEDIUM' ? 'bg-blue-500' : 'bg-green-500 shadow-[0_0_10px_#10B981]'
           }`} />
-          <span className="text-sm font-mono">CURRENT THREAT LEVEL</span>
+          <span className="text-sm font-mono">CURRENT RISK LEVEL</span>
           <span className={`font-bold text-sm ${SEVERITY_TEXT[threatLevel]}`}>{threatLevel}</span>
         </div>
         <ThreatLevelGauge level={threatLevel} />
@@ -207,13 +207,13 @@ export default function Dashboard() {
         <div className="lg:col-span-4 flex flex-col gap-4">
           <h2 className="text-lg font-display font-bold">Agent Status</h2>
           {[
-            { name: 'SANITIZER', model: 'Microsoft Phi-3 Mini', desc: 'Input scanner — 3-layer detection', color: '#EF4444' },
-            { name: 'GOVERNOR', model: 'Mistral 7B', desc: 'Policy enforcer — RBAC + Blast Radius', color: '#F59E0B' },
-            { name: 'AUDITOR', model: 'Python / SQLite', desc: 'Forensic logger — no LLM needed', color: '#3B82F6' },
+            { name: 'SAFETY SCANNER', internal: 'SANITIZER', model: 'Microsoft Phi-3 Mini', desc: 'Input scanner — 3-layer detection', color: '#EF4444' },
+            { name: 'RULE ENFORCER', internal: 'GOVERNOR', model: 'Mistral 7B', desc: 'Policy enforcer — Role & Impact checks', color: '#F59E0B' },
+            { name: 'ACTIVITY LOGGER', internal: 'AUDITOR', model: 'Python / SQLite', desc: 'Forensic logger — no AI needed', color: '#3B82F6' },
           ].map(agent => {
-            const count = agent.name === 'AUDITOR'
+            const count = agent.internal === 'AUDITOR'
               ? events.length
-              : events.filter(e => e.agent_name === agent.name).length;
+              : events.filter(e => e.agent_name === agent.internal).length;
             return (
               <div key={agent.name} className="card-border p-4">
                 <div className="flex items-center justify-between mb-2">
@@ -237,7 +237,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Blast Radius Distribution */}
         <div className="card-border p-4 h-[260px]">
-          <h2 className="text-base font-display font-bold mb-3">Blast Radius Distribution</h2>
+          <h2 className="text-base font-display font-bold mb-3">Impact Level Distribution</h2>
           <ResponsiveContainer width="100%" height="85%">
             <BarChart data={blastRadiusData} barSize={28}>
               <XAxis dataKey="name" stroke="#445566" fontSize={10} />
@@ -255,18 +255,22 @@ export default function Dashboard() {
         {/* Attack Timeline */}
         <div className="card-border p-4 h-[260px]">
           <h2 className="text-base font-display font-bold mb-3">Attack Timeline (24h)</h2>
-          <ResponsiveContainer width="100%" height="85%">
-            <LineChart data={stats.hourlyAttacks.length > 0 ? stats.hourlyAttacks : [
-              { hour: '-24h', attacks: 0 }, { hour: '-20h', attacks: 0 }, { hour: '-16h', attacks: 0 },
-              { hour: '-12h', attacks: 0 }, { hour: '-8h', attacks: 0 }, { hour: '-4h', attacks: 0 },
-            ]}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1E2D40" />
-              <XAxis dataKey="hour" stroke="#445566" fontSize={10} />
-              <YAxis stroke="#445566" fontSize={10} />
-              <Tooltip contentStyle={{ backgroundColor: '#161B25', borderColor: '#1E2D40', color: '#E8EEF8', fontSize: 12 }} />
-              <Line type="monotone" dataKey="attacks" stroke="#EF4444" strokeWidth={2} dot={{ fill: '#EF4444', r: 3 }} activeDot={{ r: 5 }} />
-            </LineChart>
-          </ResponsiveContainer>
+          {stats.hourlyAttacks.length > 0 ? (
+            <ResponsiveContainer width="100%" height="85%">
+              <LineChart data={stats.hourlyAttacks}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1E2D40" />
+                <XAxis dataKey="hour" stroke="#445566" fontSize={10} />
+                <YAxis stroke="#445566" fontSize={10} />
+                <Tooltip contentStyle={{ backgroundColor: '#161B25', borderColor: '#1E2D40', color: '#E8EEF8', fontSize: 12 }} />
+                <Line type="monotone" dataKey="attacks" stroke="#EF4444" strokeWidth={2} dot={{ fill: '#EF4444', r: 3 }} activeDot={{ r: 5 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-[85%] text-aegis-text-muted">
+              <Activity className="w-8 h-8 opacity-20 mb-2" />
+              <span className="text-sm">No attack data for the last 24 hours.</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

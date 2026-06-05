@@ -132,13 +132,13 @@ export default function AuditLog() {
             </button>
           </form>
 
-          {/* Severity */}
+          {/* Risk Level */}
           <select
             value={severity}
             onChange={e => setSeverity(e.target.value)}
             className="bg-aegis-surface border border-aegis-border rounded px-3 py-2 text-sm text-aegis-text-primary focus:outline-none focus:border-aegis-green"
           >
-            <option value="">All Severities</option>
+            <option value="">All Risk Levels</option>
             <option value="CRITICAL">Critical</option>
             <option value="HIGH">High</option>
             <option value="MEDIUM">Medium</option>
@@ -152,9 +152,9 @@ export default function AuditLog() {
             className="bg-aegis-surface border border-aegis-border rounded px-3 py-2 text-sm text-aegis-text-primary focus:outline-none focus:border-aegis-green"
           >
             <option value="">All Agents</option>
-            <option value="SANITIZER">Sanitizer</option>
-            <option value="GOVERNOR">Governor</option>
-            <option value="AUDITOR">Auditor</option>
+            <option value="SANITIZER">Safety Scanner (Sanitizer)</option>
+            <option value="GOVERNOR">Rule Enforcer (Governor)</option>
+            <option value="AUDITOR">Activity Logger (Auditor)</option>
             <option value="MAIN_AGENT">Main Agent</option>
             <option value="SYSTEM">System</option>
           </select>
@@ -218,11 +218,11 @@ export default function AuditLog() {
             <thead>
               <tr className="bg-aegis-surface border-b border-aegis-border text-xs text-aegis-text-secondary uppercase tracking-wider">
                 <th className="p-3 whitespace-nowrap">Timestamp</th>
-                <th className="p-3">Severity</th>
+                <th className="p-3">Risk Level</th>
                 <th className="p-3">Event Type</th>
                 <th className="p-3">Agent</th>
-                <th className="p-3">Decision</th>
-                <th className="p-3">Blast Radius</th>
+                <th className="p-3">Action Check</th>
+                <th className="p-3">Impact Level</th>
                 <th className="p-3 max-w-xs">Input Summary</th>
                 <th className="p-3 w-8"></th>
               </tr>
@@ -294,7 +294,7 @@ export default function AuditLog() {
                                 ['Event ID', log.id],
                                 ['Request ID', log.request_id || '—'],
                                 ['Full Timestamp', log.timestamp],
-                                ['Blast Radius Score', log.blast_radius_score != null ? `${log.blast_radius_score}/100 (${log.blast_radius_category})` : '—'],
+                                ['Impact Score', log.blast_radius_score != null ? `${log.blast_radius_score}/100 (${log.blast_radius_category})` : '—'],
                               ].map(([k, v]) => (
                                 <div key={k} className="flex gap-2">
                                   <span className="text-aegis-text-muted w-36 shrink-0">{k}:</span>

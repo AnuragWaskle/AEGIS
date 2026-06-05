@@ -77,9 +77,9 @@ export default function Stats() {
   ];
 
   const agents = [
-    { name: 'SANITIZER', model: 'Microsoft Phi-3 Mini', color: COLORS.red },
-    { name: 'GOVERNOR', model: 'Mistral 7B', color: COLORS.amber },
-    { name: 'AUDITOR', model: 'Python / SQLite', color: COLORS.blue },
+    { name: 'SAFETY SCANNER', model: 'Microsoft Phi-3 Mini', color: COLORS.red },
+    { name: 'RULE ENFORCER', model: 'Mistral 7B', color: COLORS.amber },
+    { name: 'ACTIVITY LOGGER', model: 'Python / SQLite', color: COLORS.blue },
   ];
 
   const isBlocked = simResult?.final_status === 'BLOCKED';
@@ -164,7 +164,7 @@ export default function Stats() {
               </View>
 
               <View style={styles.detailSection}>
-                <Text style={styles.detailSectionTitle}>Sanitizer</Text>
+                <Text style={styles.detailSectionTitle}>Safety Scanner</Text>
                 <Text style={[styles.detailValue, { color: simResult.sanitizer_decision?.decision === 'BLOCKED' ? COLORS.red : COLORS.green }]}>
                   {simResult.sanitizer_decision?.decision} — {(simResult.sanitizer_decision?.confidence * 100).toFixed(0)}% confidence
                 </Text>
@@ -172,7 +172,7 @@ export default function Stats() {
 
               {simResult.governor_decision && (
                 <View style={styles.detailSection}>
-                  <Text style={styles.detailSectionTitle}>Governor</Text>
+                  <Text style={styles.detailSectionTitle}>Rule Enforcer</Text>
                   <Text style={[styles.detailValue, { color: simResult.governor_decision?.decision === 'BLOCKED' ? COLORS.red : COLORS.green }]}>
                     {simResult.governor_decision?.decision}
                   </Text>

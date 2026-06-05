@@ -162,7 +162,7 @@ export default function Audit() {
                 ['Timestamp', format(new Date(selectedLog.timestamp), 'yyyy-MM-dd HH:mm:ss')],
                 ['Event ID', selectedLog.id],
                 ['Request ID', selectedLog.request_id || '—'],
-                ['Blast Radius', selectedLog.blast_radius_score != null
+                ['Impact Level', selectedLog.blast_radius_score != null
                   ? `${selectedLog.blast_radius_score}/100 (${selectedLog.blast_radius_category})`
                   : '—'],
               ].map(([label, value]) => (

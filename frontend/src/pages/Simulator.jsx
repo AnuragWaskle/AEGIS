@@ -94,7 +94,7 @@ function BlastRadiusDisplay({ score, category, damage }) {
       animate={{ opacity: 1, scale: 1 }}
       className={`p-4 rounded-lg border ${category === 'CATASTROPHIC' ? 'border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)]' : 'border-aegis-border'} ${colors.bg}`}
     >
-      <div className="text-xs text-aegis-text-secondary mb-1 font-mono">BLAST RADIUS SCORE</div>
+      <div className="text-xs text-aegis-text-secondary mb-1 font-mono">IMPACT SCORE</div>
       <div className={`text-5xl font-display font-bold ${colors.text} mb-1`}>{score}<span className="text-2xl">/100</span></div>
       <div className={`text-sm font-bold ${colors.text} mb-3`}>{category}</div>
       
@@ -318,9 +318,9 @@ export default function Simulator() {
 
             {(isProcessing || activeStep > 0) && (
               <div className="flex flex-col gap-2">
-                <ProcessingStep step={1} label="Sanitizer scanning for injections..." result={aegisResult ? (aegisResult.sanitizer_decision?.decision === 'BLOCKED' ? 'blocked' : 'approved') : null} isActive={activeStep === 1} />
+                <ProcessingStep step={1} label="Safety Scanner checking input..." result={aegisResult ? (aegisResult.sanitizer_decision?.decision === 'BLOCKED' ? 'blocked' : 'approved') : null} isActive={activeStep === 1} />
                 <ProcessingStep step={2} label="Agent reasoning about request..." result={aegisResult && aegisResult.sanitizer_decision?.decision !== 'BLOCKED' ? (aegisResult.main_agent_response ? 'approved' : null) : null} isActive={activeStep === 2} />
-                <ProcessingStep step={3} label="Governor evaluating policy & blast radius..." result={aegisResult?.governor_decision ? (aegisResult.governor_decision.decision === 'BLOCKED' ? 'blocked' : 'approved') : null} isActive={activeStep === 3} />
+                <ProcessingStep step={3} label="Rule Enforcer checking policies & impact level..." result={aegisResult?.governor_decision ? (aegisResult.governor_decision.decision === 'BLOCKED' ? 'blocked' : 'approved') : null} isActive={activeStep === 3} />
                 <ProcessingStep step={4} label="Final decision..." result={aegisResult ? (aegisResult.final_status === 'EXECUTED' ? 'approved' : 'blocked') : null} isActive={activeStep === 4} />
               </div>
             )}
@@ -330,7 +330,7 @@ export default function Simulator() {
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-3">
                   {/* Step 1: Sanitizer */}
                   <div className={`p-3 rounded border-l-2 text-sm ${aegisResult.sanitizer_decision?.decision === 'BLOCKED' ? 'border-l-red-500 bg-red-900/20' : 'border-l-green-500 bg-green-900/10'}`}>
-                    <div className="text-xs text-aegis-text-muted font-mono mb-1">STEP 1 · SANITIZER · {aegisResult.sanitizer_decision?.processing_time_ms || '?'}ms</div>
+                    <div className="text-xs text-aegis-text-muted font-mono mb-1">STEP 1 · SAFETY SCANNER · {aegisResult.sanitizer_decision?.processing_time_ms || '?'}ms</div>
                     <div className={`font-bold ${aegisResult.sanitizer_decision?.decision === 'BLOCKED' ? 'text-red-400' : 'text-aegis-green'}`}>
                       {aegisResult.sanitizer_decision?.decision === 'BLOCKED' ? '✗ INJECTION DETECTED' : '✓ Content clean — no injections found'}
                     </div>
@@ -357,7 +357,7 @@ export default function Simulator() {
                   {/* Step 3: Governor */}
                   {aegisResult.governor_decision && (
                     <div className={`p-3 rounded border-l-2 text-sm ${aegisResult.governor_decision.decision === 'BLOCKED' ? 'border-l-red-500 bg-red-900/20' : 'border-l-amber-500 bg-amber-900/10'}`}>
-                      <div className="text-xs text-aegis-text-muted font-mono mb-1">STEP 3 · GOVERNOR · Policy Check</div>
+                      <div className="text-xs text-aegis-text-muted font-mono mb-1">STEP 3 · RULE ENFORCER · Policy Check</div>
                       <div className={`font-bold ${aegisResult.governor_decision.decision === 'BLOCKED' ? 'text-red-400' : 'text-amber-400'}`}>
                         {aegisResult.governor_decision.decision === 'BLOCKED' ? '✗ POLICY VIOLATION' : '✓ Policy passed'}
                       </div>
