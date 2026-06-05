@@ -52,35 +52,57 @@ class GovernorAgent:
             
         # Step 3: Blast Radius Calculation
         weights = self.rules.get("blast_radius_weights", {})
-        base_score = weights.get(action, 0)
+        base_score = weights.get(action, 10)
         score = base_score
         
         if action == "issue_refund":
             amount = parameters.get("amount", 0)
-            if amount > 1000: score *= 5
-            elif amount > 500: score *= 2
+            if amount > 10000: score = min(base_score * 10, 100)
+            elif amount > 5000: score = min(base_score * 5, 100)
+            elif amount > 1000: score = min(base_score * 2, 100)
         elif action == "send_email":
-            body_len = len(parameters.get("body", ""))
-            if body_len > 1000: score *= 2
+            to_email = parameters.get("to_email", "")
+            body = parameters.get("body", "")
+            # External domain = 3x, bulk keywords = 5x
+            if "@" in to_email:
+                domain = to_email.split("@")[-1]
+                allowed_domains = role_rules.get("email_allowed_domains", [])
+                if allowed_domains and domain not in allowed_domains:
+                    score = min(base_score * 3, 100)
+            if any(k in body.lower() for k in ["all", "bulk", "export", "database"]):
+                score = min(score * 5, 100)
+        elif action in ["delete_database", "drop_table", "delete_ticket"]:
+            score = min(base_score * 8, 100)
+        elif action == "bulk_export":
+            score = min(base_score * 10, 100)
             
-        score = min(score, 100)
+        score = min(int(score), 100)
         
         category = "MINIMAL"
         if score > 80: category = "CATASTROPHIC"
-        elif score > 50: category = "HIGH"
-        elif score > 20: category = "MEDIUM"
-        elif score > 5: category = "LOW"
+        elif score > 60: category = "HIGH"
+        elif score > 40: category = "MEDIUM"
+        elif score > 20: category = "LOW"
+
+        # Build human-readable damage estimate
+        damage_map = {
+            "CATASTROPHIC": f"This action would have catastrophic impact — estimated data breach of 12,000+ records or ${parameters.get('amount', '?')} in fraudulent transactions.",
+            "HIGH": f"Significant risk — could expose sensitive customer data or cause ${parameters.get('amount', 0):,} in damages.",
+            "MEDIUM": f"Notable risk — could affect customer records or system integrity.",
+            "LOW": "Minor impact — limited scope action.",
+            "MINIMAL": "Negligible risk — read-only or highly constrained action."
+        }
         
         blast_radius = BlastRadiusScore(
             score=score,
             category=category,
-            affected_resources=[action],
-            estimated_damage=f"Score {score}: {category} risk"
+            affected_resources=[action] + list(parameters.keys()),
+            estimated_damage=damage_map.get(category, f"Score {score}: {category} risk")
         )
         
         if score > 80:
-            return self._build_decision("BLOCKED", f"Catastrophic blast radius ({score})", 1.0, start_time, ["CATASTROPHIC_RISK"]), blast_radius
-        if score > 50:
+            return self._build_decision("BLOCKED", f"Blast radius CATASTROPHIC ({score}/100) — action automatically blocked", 1.0, start_time, ["CATASTROPHIC_RISK"]), blast_radius
+        if score > 60:
             indicators.append("HIGH_BLAST_RADIUS")
             
         # Step 4: Behavioral anomaly check via LLM

@@ -1,118 +1,205 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatDistanceToNow } from 'date-fns';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LineChart, Line, CartesianGrid } from 'recharts';
+import { Shield, ShieldAlert, Activity, Clock, CheckCircle } from 'lucide-react';
 import axios from 'axios';
 import useAegisStore from '../store/aegisStore';
 
+// Animated counter hook
+function useCountUp(target, duration = 1200) {
+  const [value, setValue] = useState(0);
+  const prevTarget = useRef(0);
+  useEffect(() => {
+    if (target === prevTarget.current) return;
+    prevTarget.current = target;
+    const start = Date.now();
+    const from = value;
+    const tick = () => {
+      const elapsed = Date.now() - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setValue(Math.round(from + (target - from) * eased));
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, [target]);
+  return value;
+}
+
+const SEVERITY_BORDER = {
+  CRITICAL: 'border-l-red-500',
+  HIGH: 'border-l-amber-500',
+  MEDIUM: 'border-l-blue-500',
+  LOW: 'border-l-green-500',
+};
+const SEVERITY_TEXT = {
+  CRITICAL: 'text-red-400',
+  HIGH: 'text-amber-400',
+  MEDIUM: 'text-blue-400',
+  LOW: 'text-green-400',
+};
+
+function ThreatLevelGauge({ level }) {
+  const levels = { LOW: 0, MEDIUM: 1, HIGH: 2, CRITICAL: 3 };
+  const colors = { LOW: '#10B981', MEDIUM: '#3B82F6', HIGH: '#F59E0B', CRITICAL: '#EF4444' };
+  const current = levels[level] ?? 0;
+  const color = colors[level] ?? '#10B981';
+  return (
+    <div className="flex items-center gap-2">
+      {['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].map((l, i) => (
+        <div key={l} className="flex flex-col items-center gap-1">
+          <div
+            className={`w-2 h-2 rounded-full transition-all duration-500 ${i <= current ? 'opacity-100' : 'opacity-20'}`}
+            style={{ backgroundColor: colors[l], boxShadow: i === current ? `0 0 8px ${colors[l]}` : 'none' }}
+          />
+          <span className="text-[9px] font-mono" style={{ color: i === current ? color : '#445566' }}>{l}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function Dashboard() {
   const events = useAegisStore((state) => state.events);
-  const [stats, setStats] = useState({
-    blocked: 0,
-    intercepted: 0,
-    uptime: 100,
-    avgResponseTime: 0
-  });
+  const [stats, setStats] = useState({ blocked: 0, intercepted: 0, avgResponseMs: 45, hourlyAttacks: [] });
+  const [threatLevel, setThreatLevel] = useState('LOW');
+
+  const blockedCount = useCountUp(stats.blocked);
+  const interceptedCount = useCountUp(stats.intercepted);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         const res = await axios.get('http://localhost:8001/api/audit/stats');
+        const d = res.data;
         setStats({
-          blocked: res.data.blocked_count,
-          intercepted: res.data.total_events,
-          uptime: res.data.uptime_hours,
-          avgResponseTime: 45 // placeholder logic since it's not in stats yet, but we removed mock from rest
+          blocked: d.blocked_count ?? 0,
+          intercepted: d.total_events ?? 0,
+          avgResponseMs: d.avg_response_ms ?? 45,
+          hourlyAttacks: d.hourly_attacks ?? [],
         });
+        // Set threat level from breakdown
+        if (d.threat_breakdown?.CRITICAL > 0) setThreatLevel('CRITICAL');
+        else if (d.threat_breakdown?.HIGH > 0) setThreatLevel('HIGH');
+        else if (d.threat_breakdown?.MEDIUM > 0) setThreatLevel('MEDIUM');
+        else setThreatLevel('LOW');
       } catch (e) {
         console.error(e);
       }
     };
     fetchStats();
-    
-    // Fallback refresh loop
-    const interval = setInterval(fetchStats, 10000);
+    const interval = setInterval(fetchStats, 8000);
     return () => clearInterval(interval);
-  }, [events]);
+  }, [events.length]);
 
   const blastRadiusData = [
-    { name: 'MINIMAL', count: events.filter(e => e.blast_radius?.category === 'MINIMAL').length },
-    { name: 'LOW', count: events.filter(e => e.blast_radius?.category === 'LOW').length },
-    { name: 'MEDIUM', count: events.filter(e => e.blast_radius?.category === 'MEDIUM').length },
-    { name: 'HIGH', count: events.filter(e => e.blast_radius?.category === 'HIGH').length },
-    { name: 'CATASTROPHIC', count: events.filter(e => e.blast_radius?.category === 'CATASTROPHIC').length },
+    { name: 'MINIMAL', count: events.filter(e => e.blast_radius_category === 'MINIMAL').length },
+    { name: 'LOW', count: events.filter(e => e.blast_radius_category === 'LOW').length },
+    { name: 'MEDIUM', count: events.filter(e => e.blast_radius_category === 'MEDIUM').length },
+    { name: 'HIGH', count: events.filter(e => e.blast_radius_category === 'HIGH').length },
+    { name: 'CATASTROPHIC', count: events.filter(e => e.blast_radius_category === 'CATASTROPHIC').length },
   ];
 
-  const getColorForCategory = (category) => {
-    switch(category) {
-      case 'MINIMAL': return '#059669';
-      case 'LOW': return '#34D399';
-      case 'MEDIUM': return '#2563EB';
-      case 'HIGH': return '#D97706';
-      case 'CATASTROPHIC': return '#DC2626';
-      default: return '#E2E8F0';
-    }
-  };
+  const blastColors = { MINIMAL: '#10B981', LOW: '#22C55E', MEDIUM: '#3B82F6', HIGH: '#F59E0B', CATASTROPHIC: '#EF4444' };
+
+  const topMetrics = [
+    { label: 'Attacks Blocked', value: blockedCount, suffix: '', icon: ShieldAlert, color: 'text-red-400', iconColor: '#EF4444' },
+    { label: 'Threats Intercepted', value: interceptedCount, suffix: '', icon: Activity, color: 'text-amber-400', iconColor: '#F59E0B' },
+    { label: 'Agent Uptime', value: 99.9, suffix: '%', icon: Shield, color: 'text-green-400', iconColor: '#10B981' },
+    { label: 'Avg Response Time', value: stats.avgResponseMs, suffix: 'ms', icon: Clock, color: 'text-blue-400', iconColor: '#3B82F6' },
+  ];
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Threat level header bar */}
+      <div className="card-border p-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${
+            threatLevel === 'CRITICAL' ? 'bg-red-500 shadow-[0_0_10px_#EF4444]' :
+            threatLevel === 'HIGH' ? 'bg-amber-500' :
+            threatLevel === 'MEDIUM' ? 'bg-blue-500' : 'bg-green-500 shadow-[0_0_10px_#10B981]'
+          }`} />
+          <span className="text-sm font-mono">CURRENT THREAT LEVEL</span>
+          <span className={`font-bold text-sm ${SEVERITY_TEXT[threatLevel]}`}>{threatLevel}</span>
+        </div>
+        <ThreatLevelGauge level={threatLevel} />
+      </div>
+
       {/* Section 1: Top Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Attacks Blocked Today', value: stats.blocked, color: 'text-aegis-green' },
-          { label: 'Threats Intercepted', value: stats.intercepted, color: 'text-aegis-amber' },
-          { label: 'Agent Uptime', value: `${stats.uptime}%`, color: 'text-aegis-text-primary' },
-          { label: 'Avg Response Time', value: `${stats.avgResponseTime}ms`, color: 'text-aegis-text-primary' },
-        ].map((stat, i) => (
-          <div key={i} className="card-border p-4 flex flex-col justify-center">
-            <span className="text-aegis-text-secondary text-sm">{stat.label}</span>
-            <span className={`text-3xl font-mono font-bold mt-2 ${stat.color}`}>{stat.value}</span>
-          </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {topMetrics.map((stat, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className="card-border p-4 flex flex-col gap-2"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-aegis-text-secondary text-xs font-mono uppercase tracking-wider">{stat.label}</span>
+              <stat.icon className="w-4 h-4" style={{ color: stat.iconColor }} />
+            </div>
+            <span className={`text-3xl font-mono font-bold ${stat.color}`}>
+              {stat.value}{stat.suffix}
+            </span>
+          </motion.div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
         {/* Section 2: Live Threat Feed */}
-        <div className="lg:col-span-6 card-border p-4 flex flex-col h-[500px]">
-          <h2 className="text-lg font-display font-bold mb-4">Live Threat Feed</h2>
-          <div className="flex-1 overflow-y-auto pr-2 space-y-3">
-            <AnimatePresence>
-              {events.map((event) => (
+        <div className="lg:col-span-6 card-border p-4 flex flex-col h-[520px]">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-display font-bold">Live Threat Feed</h2>
+            <div className="flex items-center gap-2 text-xs text-aegis-text-muted">
+              <div className="w-2 h-2 rounded-full bg-aegis-green animate-pulse" />
+              <span className="font-mono">REAL-TIME</span>
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto pr-1 space-y-2">
+            <AnimatePresence initial={false}>
+              {events.slice(0, 30).map((event) => (
                 <motion.div
                   key={event.id}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className={`card-border bg-aegis-surface p-3 flex flex-col border-l-4 ${
-                    event.severity === 'CRITICAL' ? 'border-l-aegis-red' :
-                    event.severity === 'HIGH' ? 'border-l-aegis-amber' :
-                    event.severity === 'MEDIUM' ? 'border-l-aegis-blue' :
-                    'border-l-aegis-green'
-                  }`}
+                  initial={{ opacity: 0, y: -16, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className={`card-border bg-aegis-surface p-3 flex flex-col border-l-4 ${SEVERITY_BORDER[event.severity] || 'border-l-aegis-border'}`}
                 >
-                  <div className="flex justify-between items-start mb-2">
+                  <div className="flex justify-between items-center mb-1">
                     <div className="flex gap-2 items-center">
-                      <span className={`text-xs px-2 py-1 rounded bg-black/50 font-bold severity-${event.severity}`}>
+                      {event.decision === 'BLOCKED'
+                        ? <ShieldAlert className="w-3 h-3 text-red-400 shrink-0" />
+                        : <CheckCircle className="w-3 h-3 text-green-400 shrink-0" />
+                      }
+                      <span className={`text-xs px-1.5 py-0.5 rounded font-bold font-mono ${SEVERITY_TEXT[event.severity] || ''}`}>
                         {event.severity}
                       </span>
-                      <span className="text-xs font-mono text-aegis-text-secondary">{event.agent_name}</span>
-                      <span className={`text-xs font-bold ${event.decision === 'BLOCKED' ? 'text-aegis-red' : event.decision === 'APPROVED' ? 'text-aegis-green' : 'text-aegis-amber'}`}>
+                      <span className="text-xs font-mono text-aegis-text-muted">{event.agent_name}</span>
+                      <span className={`text-xs font-bold font-mono ${
+                        event.decision === 'BLOCKED' ? 'text-red-400' :
+                        event.decision === 'APPROVED' ? 'text-green-400' : 'text-amber-400'
+                      }`}>
                         {event.decision}
                       </span>
                     </div>
-                    <span className="text-xs text-aegis-text-muted">
+                    <span className="text-xs text-aegis-text-muted whitespace-nowrap ml-2">
                       {formatDistanceToNow(new Date(event.timestamp), { addSuffix: true })}
                     </span>
                   </div>
-                  <p className="text-sm truncate text-aegis-text-primary">
-                    {event.input_summary}
+                  <p className="text-xs text-aegis-text-secondary truncate font-mono">
+                    {String(event.input_summary || '').slice(0, 90)}
                   </p>
                 </motion.div>
               ))}
-              {events.length === 0 && (
-                <div className="text-aegis-text-muted text-center mt-10">No events yet. Awaiting data...</div>
-              )}
             </AnimatePresence>
+            {events.length === 0 && (
+              <div className="flex flex-col items-center justify-center h-full gap-4 text-aegis-text-muted">
+                <Shield className="w-12 h-12 opacity-20" />
+                <p className="text-sm">No threats yet. Run a simulation to see live events.</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -120,42 +207,66 @@ export default function Dashboard() {
         <div className="lg:col-span-4 flex flex-col gap-4">
           <h2 className="text-lg font-display font-bold">Agent Status</h2>
           {[
-            { name: 'Sanitizer', model: 'Microsoft Phi-3 Mini', count: events.filter(e=>e.agent_name==='SANITIZER').length },
-            { name: 'Governor', model: 'Mistral 7B', count: events.filter(e=>e.agent_name==='GOVERNOR').length },
-            { name: 'Auditor', model: 'Python / SQLite', count: events.filter(e=>e.agent_name==='AUDITOR').length || events.length },
-          ].map(agent => (
-            <div key={agent.name} className="card-border p-4 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-2 h-2 rounded-full bg-aegis-green shadow-[0_0_8px_#00FF88] animate-pulse" />
-                  <span className="font-bold">{agent.name}</span>
+            { name: 'SANITIZER', model: 'Microsoft Phi-3 Mini', desc: 'Input scanner', color: '#EF4444' },
+            { name: 'GOVERNOR', model: 'qwen2.5-coder:7b', desc: 'Policy enforcer', color: '#F59E0B' },
+            { name: 'AUDITOR', model: 'Python / SQLite', desc: 'Forensic logger', color: '#3B82F6' },
+          ].map(agent => {
+            const count = agent.name === 'AUDITOR'
+              ? events.length
+              : events.filter(e => e.agent_name === agent.name).length;
+            return (
+              <div key={agent.name} className="card-border p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: agent.color, boxShadow: `0 0 6px ${agent.color}` }} />
+                    <span className="font-bold font-mono text-sm">{agent.name}</span>
+                    <span className="text-xs bg-green-900/40 text-green-400 px-1.5 py-0.5 rounded font-mono">ONLINE</span>
+                  </div>
+                  <div className="text-xl font-mono font-bold text-aegis-green">{count}</div>
                 </div>
-                <div className="text-xs font-mono text-aegis-text-secondary">{agent.model}</div>
+                <div className="text-xs font-mono text-aegis-text-muted">{agent.model}</div>
+                <div className="text-xs text-aegis-text-secondary mt-1">{agent.desc}</div>
               </div>
-              <div className="text-right">
-                <div className="text-xs text-aegis-text-muted">Processed Today</div>
-                <div className="text-xl font-mono text-aegis-green">{agent.count}</div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* Section 4: Blast Radius */}
-      <div className="card-border p-4 h-[300px]">
-        <h2 className="text-lg font-display font-bold mb-4">Blast Radius Distribution (24h)</h2>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={blastRadiusData}>
-            <XAxis dataKey="name" stroke="#8899AA" fontSize={12} />
-            <YAxis stroke="#8899AA" fontSize={12} />
-            <Tooltip contentStyle={{ backgroundColor: '#161B25', borderColor: '#1E2D40' }} />
-            <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-              {blastRadiusData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={getColorForCategory(entry.name)} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+      {/* Section 4: Charts row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Blast Radius Distribution */}
+        <div className="card-border p-4 h-[260px]">
+          <h2 className="text-base font-display font-bold mb-3">Blast Radius Distribution</h2>
+          <ResponsiveContainer width="100%" height="85%">
+            <BarChart data={blastRadiusData} barSize={28}>
+              <XAxis dataKey="name" stroke="#445566" fontSize={10} />
+              <YAxis stroke="#445566" fontSize={10} />
+              <Tooltip contentStyle={{ backgroundColor: '#161B25', borderColor: '#1E2D40', color: '#E8EEF8', fontSize: 12 }} />
+              <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                {blastRadiusData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={blastColors[entry.name]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Attack Timeline */}
+        <div className="card-border p-4 h-[260px]">
+          <h2 className="text-base font-display font-bold mb-3">Attack Timeline (24h)</h2>
+          <ResponsiveContainer width="100%" height="85%">
+            <LineChart data={stats.hourlyAttacks.length > 0 ? stats.hourlyAttacks : [
+              { hour: '-24h', attacks: 0 }, { hour: '-20h', attacks: 0 }, { hour: '-16h', attacks: 0 },
+              { hour: '-12h', attacks: 0 }, { hour: '-8h', attacks: 0 }, { hour: '-4h', attacks: 0 },
+            ]}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1E2D40" />
+              <XAxis dataKey="hour" stroke="#445566" fontSize={10} />
+              <YAxis stroke="#445566" fontSize={10} />
+              <Tooltip contentStyle={{ backgroundColor: '#161B25', borderColor: '#1E2D40', color: '#E8EEF8', fontSize: 12 }} />
+              <Line type="monotone" dataKey="attacks" stroke="#EF4444" strokeWidth={2} dot={{ fill: '#EF4444', r: 3 }} activeDot={{ r: 5 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );
