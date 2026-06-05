@@ -6,21 +6,21 @@ export default function Architecture() {
 
   const layers = {
     sanitizer: {
-      title: "Agent 1: Sanitizer",
+      title: "Agent 1: Safety Scanner",
       model: "Microsoft Phi-3 Mini",
       desc: "Intercepts data before the main agent reads it. Detects Unicode tricks, role-play overrides, and hidden commands.",
       example: "Replaces hidden text with [INJECTION DETECTED]",
       icon: Shield
     },
     governor: {
-      title: "Agent 2: Governor",
+      title: "Agent 2: Rule Enforcer",
       model: "Mistral 7B + Pure Python Rules",
-      desc: "Intercepts tool calls before execution. Evaluates Role-Based Access Control (RBAC) policies and calculates Blast Radius.",
+      desc: "Intercepts tool calls before execution. Evaluates Role-Based Access Control (RBAC) policies and calculates Impact Level.",
       example: "Blocks issue_refund(50000) because limit is 200",
       icon: ShieldCheck
     },
     auditor: {
-      title: "Agent 3: Auditor",
+      title: "Agent 3: Activity Logger",
       model: "Python / SQLite",
       desc: "Silently records every prompt, decision, and block into an immutable forensic log.",
       example: "Logs timestamp, severity, and full context of a blocked action",
@@ -52,7 +52,7 @@ export default function Architecture() {
               onClick={() => setActiveLayer('sanitizer')}
               className={`w-full p-4 card-border border-2 flex items-center justify-center gap-3 transition-all ${activeLayer === 'sanitizer' ? 'border-aegis-green glow-green text-aegis-green' : 'border-aegis-border hover:border-aegis-text-secondary'}`}
             >
-              <Shield className="w-5 h-5" /> 1. Sanitizer Agent
+              <Shield className="w-5 h-5" /> 1. Safety Scanner Agent
             </button>
             
             <div className="w-0.5 h-6 bg-aegis-border mx-auto relative">
@@ -73,7 +73,7 @@ export default function Architecture() {
               onClick={() => setActiveLayer('governor')}
               className={`w-full p-4 card-border border-2 flex items-center justify-center gap-3 transition-all ${activeLayer === 'governor' ? 'border-aegis-amber glow-amber text-aegis-amber' : 'border-aegis-border hover:border-aegis-text-secondary'}`}
             >
-              <ShieldCheck className="w-5 h-5" /> 2. Governor Agent
+              <ShieldCheck className="w-5 h-5" /> 2. Rule Enforcer Agent
             </button>
 
             <div className="w-0.5 h-6 bg-aegis-border mx-auto"></div>
@@ -91,7 +91,7 @@ export default function Architecture() {
               className={`p-4 card-border border-2 flex flex-col items-center justify-center gap-3 h-64 transition-all ${activeLayer === 'auditor' ? 'border-aegis-blue shadow-[0_0_20px_rgba(68,136,255,0.3)] text-aegis-blue' : 'border-aegis-border hover:border-aegis-text-secondary'}`}
             >
               <Database className="w-6 h-6 mb-2" />
-              <div className="rotate-90 origin-center whitespace-nowrap translate-x-3 translate-y-3 font-bold tracking-wider">3. AUDITOR AGENT</div>
+              <div className="rotate-90 origin-center whitespace-nowrap translate-x-3 translate-y-3 font-bold tracking-wider">3. ACTIVITY LOGGER AGENT</div>
             </button>
           </div>
         </div>
