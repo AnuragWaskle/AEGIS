@@ -1,0 +1,41 @@
+{
+  "roles": {
+    "customer": {
+      "allowed_actions": ["view_ticket", "submit_ticket"],
+      "max_refund_amount": 0,
+      "can_read_external_urls": false,
+      "can_send_emails": false,
+      "can_query_database": false
+    },
+    "support_agent": {
+      "allowed_actions": ["view_ticket", "issue_refund", "send_email", "update_order"],
+      "max_refund_amount": 200,
+      "can_read_external_urls": true,
+      "can_send_emails": true,
+      "can_query_database": false,
+      "email_allowed_domains": ["company.com", "partner.com"]
+    },
+    "admin": {
+      "allowed_actions": ["all"],
+      "max_refund_amount": 10000,
+      "can_read_external_urls": true,
+      "can_send_emails": true,
+      "can_query_database": true
+    }
+  },
+  "high_risk_actions": [
+    "delete_database",
+    "drop_table",
+    "bulk_export",
+    "send_external_email",
+    "create_admin_user"
+  ],
+  "blast_radius_weights": {
+    "delete_database": 100,
+    "bulk_export": 90,
+    "send_external_email": 70,
+    "issue_refund": 30,
+    "update_order": 20,
+    "view_ticket": 5
+  }
+}
