@@ -87,8 +87,14 @@ export default function Reports() {
         </div>
         <div className="card-border p-6 flex flex-col justify-center items-center text-center border-b-4 border-b-aegis-green">
           <CheckCircle className="w-8 h-8 text-aegis-green mb-2" />
-          <div className="text-sm text-aegis-text-secondary">Compliance Score</div>
-          <div className="text-4xl font-mono font-bold text-aegis-green mt-2">{stats.total === 0 ? "100" : ((1 - (stats.blocked / stats.total)) * 100).toFixed(1)}%</div>
+          <div className="text-sm text-aegis-text-secondary">Detection Rate</div>
+          <div className="text-4xl font-mono font-bold text-aegis-green mt-2">
+            {stats.total === 0 ? '100' : (
+              // Detection rate: what % of all events were correctly identified threats
+              ((stats.blocked / Math.max(stats.total, 1)) * 100).toFixed(1)
+            )}%
+          </div>
+          <div className="text-xs text-aegis-text-muted mt-1">attacks intercepted</div>
         </div>
       </div>
 

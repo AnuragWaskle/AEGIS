@@ -6,8 +6,20 @@ router = APIRouter()
 auditor = AuditorAgent()
 
 @router.get("/events")
-async def get_events(limit: int = Query(50), severity: Optional[str] = None, since: Optional[str] = None):
-    return await auditor.get_events(limit=limit, severity=severity, since=since)
+async def get_events(
+    limit: int = Query(50, ge=1, le=500),
+    severity: Optional[str] = None,
+    since: Optional[str] = None,
+    agent: Optional[str] = None,
+    search: Optional[str] = None,
+):
+    return await auditor.get_events(
+        limit=limit,
+        severity=severity,
+        since=since,
+        agent=agent,
+        search=search,
+    )
 
 @router.get("/stats")
 async def get_stats():
@@ -16,12 +28,20 @@ async def get_stats():
 @router.get("/export/csv")
 async def export_csv():
     csv_data = await auditor.export_csv()
-    return Response(content=csv_data, media_type="text/csv", headers={"Content-Disposition": "attachment; filename=audit_export.csv"})
+    return Response(
+        content=csv_data,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=aegis_audit_export.csv"},
+    )
 
 @router.get("/export/pdf")
 async def export_pdf():
     pdf_data = await auditor.generate_compliance_report()
-    return Response(content=pdf_data, media_type="application/pdf", headers={"Content-Disposition": "attachment; filename=compliance_report.pdf"})
+    return Response(
+        content=pdf_data,
+        media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=aegis_compliance_report.pdf"},
+    )
 
 @router.delete("/clear")
 async def clear_audit():

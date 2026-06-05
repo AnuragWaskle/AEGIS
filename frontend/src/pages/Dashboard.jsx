@@ -207,9 +207,9 @@ export default function Dashboard() {
         <div className="lg:col-span-4 flex flex-col gap-4">
           <h2 className="text-lg font-display font-bold">Agent Status</h2>
           {[
-            { name: 'SANITIZER', model: 'Microsoft Phi-3 Mini', desc: 'Input scanner', color: '#EF4444' },
-            { name: 'GOVERNOR', model: 'qwen2.5-coder:7b', desc: 'Policy enforcer', color: '#F59E0B' },
-            { name: 'AUDITOR', model: 'Python / SQLite', desc: 'Forensic logger', color: '#3B82F6' },
+            { name: 'SANITIZER', model: 'Microsoft Phi-3 Mini', desc: 'Input scanner — 3-layer detection', color: '#EF4444' },
+            { name: 'GOVERNOR', model: 'Mistral 7B', desc: 'Policy enforcer — RBAC + Blast Radius', color: '#F59E0B' },
+            { name: 'AUDITOR', model: 'Python / SQLite', desc: 'Forensic logger — no LLM needed', color: '#3B82F6' },
           ].map(agent => {
             const count = agent.name === 'AUDITOR'
               ? events.length
@@ -231,6 +231,7 @@ export default function Dashboard() {
           })}
         </div>
       </div>
+
 
       {/* Section 4: Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

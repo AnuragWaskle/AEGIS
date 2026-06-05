@@ -5,6 +5,7 @@ import uvicorn
 
 from api.routes_demo import router as demo_router
 from api.routes_audit import router as audit_router
+from api.routes_agent import router as agent_router
 from api.websocket import router as ws_router
 from agents.auditor import AuditorAgent
 
@@ -15,7 +16,7 @@ from datetime import datetime
 from models.schemas import AuditEvent, ThreatLevel
 import traceback
 
-app = FastAPI(title="Aegis API", version="1.0.0")
+app = FastAPI(title="Aegis — Agentic Immune System API", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,46 +28,52 @@ app.add_middleware(
 
 app.include_router(demo_router, prefix="/api/demo")
 app.include_router(audit_router, prefix="/api/audit")
+app.include_router(agent_router, prefix="/api/agent")
 app.include_router(ws_router)
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     error_msg = f"{type(exc).__name__}: {str(exc)}"
     stack_trace = traceback.format_exc()
-    
+
     event = AuditEvent(
         id=str(uuid.uuid4()),
         timestamp=datetime.utcnow(),
-        event_type="SYSTEM_CRASH",
-        severity=ThreatLevel.CRITICAL,
+        event_type="SYSTEM_ERROR",
+        severity=ThreatLevel.HIGH,
         agent_name="SYSTEM",
-        input_summary=error_msg[:100],
-        decision="BLOCKED",
-        details={"error": error_msg, "traceback": stack_trace, "path": request.url.path}
+        input_summary=error_msg[:200],
+        decision="FLAGGED",
+        details={"error": error_msg, "traceback": stack_trace[:1000], "path": str(request.url.path)},
     )
-    
+
     auditor = AuditorAgent()
     await auditor.log(event, str(uuid.uuid4()))
-    
+
     try:
         from api.websocket import broadcast
         await broadcast({"type": "NEW_EVENT", "data": event.model_dump(mode="json")})
-    except ImportError:
+    except Exception:
         pass
-        
+
     return JSONResponse(
         status_code=500,
-        content={"error": "Internal Server Error", "message": error_msg}
+        content={"error": "Internal Server Error", "message": error_msg},
     )
 
 @app.on_event("startup")
 async def startup_event():
-    # Initializes SQLite database
-    AuditorAgent()
+    AuditorAgent()  # Initializes SQLite database on startup
 
 @app.get("/health")
 async def health_check():
-    return {"status": "ok", "agents": ["sanitizer", "governor", "auditor"]}
+    return {
+        "status": "ok",
+        "version": "2.0.0",
+        "agents": ["sanitizer", "governor", "auditor"],
+        "endpoints": ["/api/demo", "/api/audit", "/api/agent", "/ws"],
+    }
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
+

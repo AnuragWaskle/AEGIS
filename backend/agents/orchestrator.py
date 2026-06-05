@@ -105,7 +105,9 @@ class AegisOrchestrator:
         overall_status = "EXECUTED"
         
         for tool_call in tool_calls:
-            gov_dec, blast_radius = await self.governor.evaluate(tool_call, request.user_role, request.content)
+            gov_dec, blast_radius = await self.governor.evaluate(
+                tool_call, request.user_role, request.content, user_id=request.user_id
+            )
             governor_decisions.append(gov_dec)
             
             severity = ThreatLevel.LOW
@@ -133,7 +135,7 @@ class AegisOrchestrator:
             try:
                 from api.websocket import broadcast
                 await broadcast({"type": "NEW_EVENT", "data": gov_event.model_dump(mode="json")})
-            except ImportError:
+            except Exception:
                 pass
 
             if gov_dec.decision == "BLOCKED":
