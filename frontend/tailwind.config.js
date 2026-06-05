@@ -22,8 +22,8 @@ export default {
       },
       fontFamily: {
         mono: ["'JetBrains Mono'", "monospace"],
-        sans: ["'IBM Plex Sans'", "sans-serif"],
-        display: ["'Syne'", "sans-serif"]
+        sans: ["'Inter'", "sans-serif"],
+        display: ["'Outfit'", "sans-serif"]
       },
       animation: {
         "pulse-green": "pulseGreen 2s ease-in-out infinite",

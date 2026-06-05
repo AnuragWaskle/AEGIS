@@ -34,10 +34,10 @@ const SEVERITY_BORDER = {
   LOW: 'border-l-green-500',
 };
 const SEVERITY_TEXT = {
-  CRITICAL: 'text-red-400',
-  HIGH: 'text-amber-400',
-  MEDIUM: 'text-blue-400',
-  LOW: 'text-green-400',
+  CRITICAL: 'text-red-600',
+  HIGH: 'text-amber-600',
+  MEDIUM: 'text-blue-600',
+  LOW: 'text-emerald-600',
 };
 
 function ThreatLevelGauge({ level }) {
@@ -104,10 +104,10 @@ export default function Dashboard() {
   const blastColors = { MINIMAL: '#10B981', LOW: '#22C55E', MEDIUM: '#3B82F6', HIGH: '#F59E0B', CATASTROPHIC: '#EF4444' };
 
   const topMetrics = [
-    { label: 'Attacks Blocked', value: blockedCount, suffix: '', icon: ShieldAlert, color: 'text-red-400', iconColor: '#EF4444' },
-    { label: 'Threats Intercepted', value: interceptedCount, suffix: '', icon: Activity, color: 'text-amber-400', iconColor: '#F59E0B' },
-    { label: 'Agent Uptime', value: 99.9, suffix: '%', icon: Shield, color: 'text-green-400', iconColor: '#10B981' },
-    { label: 'Avg Response Time', value: stats.avgResponseMs, suffix: 'ms', icon: Clock, color: 'text-blue-400', iconColor: '#3B82F6' },
+    { label: 'Attacks Blocked', value: blockedCount, suffix: '', icon: ShieldAlert, color: 'text-red-600', iconColor: '#EF4444' },
+    { label: 'Threats Intercepted', value: interceptedCount, suffix: '', icon: Activity, color: 'text-amber-600', iconColor: '#F59E0B' },
+    { label: 'Agent Uptime', value: 99.9, suffix: '%', icon: Shield, color: 'text-emerald-600', iconColor: '#10B981' },
+    { label: 'Avg Response Time', value: stats.avgResponseMs, suffix: 'ms', icon: Clock, color: 'text-blue-600', iconColor: '#3B82F6' },
   ];
 
   return (
@@ -170,16 +170,16 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center mb-1">
                     <div className="flex gap-2 items-center">
                       {event.decision === 'BLOCKED'
-                        ? <ShieldAlert className="w-3 h-3 text-red-400 shrink-0" />
-                        : <CheckCircle className="w-3 h-3 text-green-400 shrink-0" />
+                        ? <ShieldAlert className="w-3 h-3 text-red-600 shrink-0" />
+                        : <CheckCircle className="w-3 h-3 text-emerald-600 shrink-0" />
                       }
                       <span className={`text-xs px-1.5 py-0.5 rounded font-bold font-mono ${SEVERITY_TEXT[event.severity] || ''}`}>
                         {event.severity}
                       </span>
                       <span className="text-xs font-mono text-aegis-text-muted">{event.agent_name}</span>
                       <span className={`text-xs font-bold font-mono ${
-                        event.decision === 'BLOCKED' ? 'text-red-400' :
-                        event.decision === 'APPROVED' ? 'text-green-400' : 'text-amber-400'
+                        event.decision === 'BLOCKED' ? 'text-red-600' :
+                        event.decision === 'APPROVED' ? 'text-emerald-600' : 'text-amber-600'
                       }`}>
                         {event.decision}
                       </span>
@@ -220,7 +220,7 @@ export default function Dashboard() {
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: agent.color, boxShadow: `0 0 6px ${agent.color}` }} />
                     <span className="font-bold font-mono text-sm">{agent.name}</span>
-                    <span className="text-xs bg-green-900/40 text-green-400 px-1.5 py-0.5 rounded font-mono">ONLINE</span>
+                    <span className="text-xs bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-mono">ONLINE</span>
                   </div>
                   <div className="text-xl font-mono font-bold text-aegis-green">{count}</div>
                 </div>
@@ -242,7 +242,7 @@ export default function Dashboard() {
             <BarChart data={blastRadiusData} barSize={28}>
               <XAxis dataKey="name" stroke="#445566" fontSize={10} />
               <YAxis stroke="#445566" fontSize={10} />
-              <Tooltip contentStyle={{ backgroundColor: '#161B25', borderColor: '#1E2D40', color: '#E8EEF8', fontSize: 12 }} />
+              <Tooltip contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E2E8F0', color: '#0F172A', fontSize: 12, borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} />
               <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                 {blastRadiusData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={blastColors[entry.name]} />
@@ -258,10 +258,10 @@ export default function Dashboard() {
           {stats.hourlyAttacks.length > 0 ? (
             <ResponsiveContainer width="100%" height="85%">
               <LineChart data={stats.hourlyAttacks}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1E2D40" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
                 <XAxis dataKey="hour" stroke="#445566" fontSize={10} />
                 <YAxis stroke="#445566" fontSize={10} />
-                <Tooltip contentStyle={{ backgroundColor: '#161B25', borderColor: '#1E2D40', color: '#E8EEF8', fontSize: 12 }} />
+                <Tooltip contentStyle={{ backgroundColor: '#FFFFFF', borderColor: '#E2E8F0', color: '#0F172A', fontSize: 12, borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} />
                 <Line type="monotone" dataKey="attacks" stroke="#EF4444" strokeWidth={2} dot={{ fill: '#EF4444', r: 3 }} activeDot={{ r: 5 }} />
               </LineChart>
             </ResponsiveContainer>

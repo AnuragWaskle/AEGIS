@@ -4,25 +4,25 @@ import { format } from 'date-fns';
 import { Download, ChevronDown, ChevronUp, Search, Filter, ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 const SEVERITY_TEXT = {
-  CRITICAL: 'text-red-400',
-  HIGH: 'text-amber-400',
-  MEDIUM: 'text-blue-400',
-  LOW: 'text-green-400',
+  CRITICAL: 'text-red-600',
+  HIGH: 'text-amber-600',
+  MEDIUM: 'text-blue-600',
+  LOW: 'text-emerald-600',
 };
 
 const DECISION_TEXT = {
-  BLOCKED: 'text-red-400',
-  APPROVED: 'text-green-400',
-  FLAGGED: 'text-amber-400',
-  EXECUTED: 'text-green-400',
+  BLOCKED: 'text-red-600',
+  APPROVED: 'text-emerald-600',
+  FLAGGED: 'text-amber-600',
+  EXECUTED: 'text-emerald-600',
 };
 
 const BLAST_TEXT = {
-  CATASTROPHIC: 'text-red-400 font-bold',
-  HIGH: 'text-amber-400',
-  MEDIUM: 'text-blue-400',
-  LOW: 'text-green-400',
-  MINIMAL: 'text-emerald-400',
+  CATASTROPHIC: 'text-red-600 font-bold',
+  HIGH: 'text-amber-600',
+  MEDIUM: 'text-blue-600',
+  LOW: 'text-emerald-600',
+  MINIMAL: 'text-emerald-600',
 };
 
 const PAGE_SIZE = 25;
