@@ -89,7 +89,7 @@ export default function Audit() {
             {item.severity}
           </Text>
         </View>
-        <Text style={styles.timeText}>{format(new Date(item.timestamp), 'HH:mm')}</Text>
+        <Text style={styles.timeText}>{format(new Date(item.timestamp + (item.timestamp.endsWith('Z') ? '' : 'Z')), 'HH:mm')}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -159,7 +159,7 @@ export default function Audit() {
               {[
                 ['Event Type', selectedLog.event_type],
                 ['Agent', selectedLog.agent_name],
-                ['Timestamp', format(new Date(selectedLog.timestamp), 'yyyy-MM-dd HH:mm:ss')],
+                ['Timestamp', format(new Date(selectedLog.timestamp + (selectedLog.timestamp.endsWith('Z') ? '' : 'Z')), 'yyyy-MM-dd HH:mm:ss')],
                 ['Event ID', selectedLog.id],
                 ['Request ID', selectedLog.request_id || '—'],
                 ['Impact Level', selectedLog.blast_radius_score != null

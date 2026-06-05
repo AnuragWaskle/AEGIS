@@ -185,7 +185,7 @@ export default function Dashboard() {
                       </span>
                     </div>
                     <span className="text-xs text-aegis-text-muted whitespace-nowrap ml-2">
-                      {formatDistanceToNow(new Date(event.timestamp), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(event.timestamp + (event.timestamp.endsWith('Z') ? '' : 'Z')), { addSuffix: true })}
                     </span>
                   </div>
                   <p className="text-xs text-aegis-text-secondary truncate font-mono">

@@ -293,7 +293,7 @@ export default function AuditLog() {
                               {[
                                 ['Event ID', log.id],
                                 ['Request ID', log.request_id || '—'],
-                                ['Full Timestamp', log.timestamp],
+                                ['Full Timestamp', format(new Date(log.timestamp + (log.timestamp.endsWith('Z') ? '' : 'Z')), 'yyyy-MM-dd HH:mm:ss')],
                                 ['Impact Score', log.blast_radius_score != null ? `${log.blast_radius_score}/100 (${log.blast_radius_category})` : '—'],
                               ].map(([k, v]) => (
                                 <div key={k} className="flex gap-2">
