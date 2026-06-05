@@ -1,0 +1,212 @@
+{
+  "mitre_atlas": {
+    "INSTRUCTION_OVERRIDE": {
+      "id": "AML.T0051",
+      "name": "LLM Prompt Injection",
+      "tactic": "Impact",
+      "description": "Attacker crafts inputs to override LLM instructions",
+      "url": "https://atlas.mitre.org/techniques/AML.T0051"
+    },
+    "ROLE_PLAY_ATTACK": {
+      "id": "AML.T0054",
+      "name": "LLM Jailbreak",
+      "tactic": "Defense Evasion",
+      "description": "Bypass safety controls via roleplay or persona override",
+      "url": "https://atlas.mitre.org/techniques/AML.T0054"
+    },
+    "ENCODED_PAYLOAD": {
+      "id": "AML.T0051.002",
+      "name": "Indirect Prompt Injection via Encoded Content",
+      "tactic": "Initial Access",
+      "description": "Base64 or Unicode-encoded injection payloads",
+      "url": "https://atlas.mitre.org/techniques/AML.T0051"
+    },
+    "BEHAVIORAL_OVERRIDE": {
+      "id": "AML.T0056",
+      "name": "Poison Training Data - Memory",
+      "tactic": "Persistence",
+      "description": "Plant malicious rules in agent long-term memory",
+      "url": "https://atlas.mitre.org/techniques/AML.T0056"
+    },
+    "TRIGGER_PAYLOAD": {
+      "id": "AML.T0056.001",
+      "name": "Backdoor via Trigger Word",
+      "tactic": "Persistence",
+      "description": "Sleeper payload activated by common trigger words",
+      "url": "https://atlas.mitre.org/techniques/AML.T0056"
+    },
+    "TOOL_MISUSE": {
+      "id": "AML.T0057",
+      "name": "Exploit Public-Facing AI Agent Tool",
+      "tactic": "Execution",
+      "description": "Manipulate agent tools beyond authorized scope",
+      "url": "https://atlas.mitre.org/techniques/AML.T0057"
+    },
+    "SOCIAL_ENGINEERING": {
+      "id": "AML.T0052",
+      "name": "Craft Adversarial Data",
+      "tactic": "ML Attack Staging",
+      "description": "Socially engineered content to manipulate AI reasoning",
+      "url": "https://atlas.mitre.org/techniques/AML.T0052"
+    }
+  },
+  "owasp_asi": [
+    {
+      "id": "ASI01",
+      "name": "Agent Goal Hijack",
+      "covered_by": ["sanitizer", "governor"],
+      "coverage_level": "FULL",
+      "description": "Attacker seizes control of agent decision-making process"
+    },
+    {
+      "id": "ASI02",
+      "name": "Tool Misuse & Exploitation",
+      "covered_by": ["governor"],
+      "coverage_level": "FULL",
+      "description": "Agents manipulated into misusing their tools"
+    },
+    {
+      "id": "ASI03",
+      "name": "Agent Identity & Privilege Abuse",
+      "covered_by": ["governor"],
+      "coverage_level": "FULL",
+      "description": "Agent borrows or exceeds its authorized identity scope"
+    },
+    {
+      "id": "ASI04",
+      "name": "Agentic Supply Chain Compromise",
+      "covered_by": [],
+      "coverage_level": "PARTIAL",
+      "description": "Malicious components in agent dependencies"
+    },
+    {
+      "id": "ASI05",
+      "name": "Unexpected Code Execution",
+      "covered_by": ["governor"],
+      "coverage_level": "FULL",
+      "description": "Agent executes unintended or malicious code"
+    },
+    {
+      "id": "ASI06",
+      "name": "Memory & Context Poisoning",
+      "covered_by": ["memory_sentinel", "sanitizer"],
+      "coverage_level": "FULL",
+      "description": "Persistent malicious instructions in agent memory"
+    },
+    {
+      "id": "ASI07",
+      "name": "Insecure Inter-Agent Communication",
+      "covered_by": ["sanitizer"],
+      "coverage_level": "PARTIAL",
+      "description": "Unsafe data passing between agents"
+    },
+    {
+      "id": "ASI08",
+      "name": "Cascading Agent Failures",
+      "covered_by": ["governor", "auditor"],
+      "coverage_level": "FULL",
+      "description": "One compromised agent corrupts the entire pipeline"
+    },
+    {
+      "id": "ASI09",
+      "name": "Human-Agent Trust Exploitation",
+      "covered_by": ["auditor", "governor"],
+      "coverage_level": "FULL",
+      "description": "Agent manipulates human operators through deceptive output"
+    },
+    {
+      "id": "ASI10",
+      "name": "Rogue Agents",
+      "covered_by": ["governor", "auditor"],
+      "coverage_level": "PARTIAL",
+      "description": "Behavioral drift, collusion, self-replication"
+    }
+  ],
+  "real_cves": [
+    {
+      "id": "CVE-2025-32711",
+      "name": "EchoLeak",
+      "product": "Microsoft 365 Copilot",
+      "date": "2025",
+      "attack_type": "INSTRUCTION_OVERRIDE",
+      "description": "Zero-click data exfiltration from M365 Copilot via indirect prompt injection in shared documents. Exposed user emails and files without any user action.",
+      "aegis_defense": "Sanitizer intercepts the injected instruction before the agent processes the document content.",
+      "severity": "CRITICAL",
+      "source": "Microsoft Security Research"
+    },
+    {
+      "id": "ZombieAgent-2026",
+      "name": "ZombieAgent",
+      "product": "OpenAI Deep Research Agent",
+      "date": "January 2026",
+      "attack_type": "TRIGGER_PAYLOAD",
+      "description": "Zero-click IPI that implanted malicious rules into ChatGPT long-term memory. Persisted across sessions. Agent continued executing attacker instructions in future conversations weeks after initial infection.",
+      "aegis_defense": "Memory Sentinel scans all memory writes for behavioral overrides and trigger-word payloads before they are saved.",
+      "severity": "CRITICAL",
+      "source": "Radware Security Research"
+    },
+    {
+      "id": "AI-AdBypass-2025",
+      "name": "AI Ad Review Bypass",
+      "product": "AI-based Ad Moderation System",
+      "date": "December 2025",
+      "attack_type": "SOCIAL_ENGINEERING",
+      "description": "Attackers embedded indirect prompt injection payloads in product listings. The AI ad review agent was manipulated into approving fraudulent advertisements including content that would harm consumers.",
+      "aegis_defense": "Sanitizer scans all inbound content for adversarial manipulation phrases before the main agent evaluates it.",
+      "severity": "HIGH",
+      "source": "Industry Report 2026"
+    },
+    {
+      "id": "RoguePilot-2026",
+      "name": "RoguePilot",
+      "product": "GitHub Copilot",
+      "date": "2026",
+      "attack_type": "ENCODED_PAYLOAD",
+      "description": "Passive prompt injection vulnerability where malicious repository content hijacked Copilot to contact attacker-controlled MCP servers and execute arbitrary payloads on developer machines.",
+      "aegis_defense": "Sanitizer detects encoded payloads and MCP server manipulation attempts. Governor blocks unauthorized external connections.",
+      "severity": "CRITICAL",
+      "source": "Security Research 2026"
+    },
+    {
+      "id": "MemMorph-2026",
+      "name": "MemMorph",
+      "product": "LLM Agents with Vector Memory",
+      "date": "2026",
+      "attack_type": "BEHAVIORAL_OVERRIDE",
+      "description": "Hijacks agent tool selection by slipping disguised records into long-term vector memory. Because it never touches tool metadata, the resulting behavioral bias is extremely hard to detect with standard monitoring.",
+      "aegis_defense": "Memory Sentinel uses provenance scoring and LLM-based scan to detect disguised behavioral records before they enter vector memory.",
+      "severity": "HIGH",
+      "source": "Academic Research 2026"
+    }
+  ],
+  "agent_identities": {
+    "sanitizer": {
+      "agent_id": "AEGIS-SAN-001",
+      "scope": ["READ_INBOUND_CONTENT", "WRITE_SANITIZED_OUTPUT", "WRITE_AUDIT_LOG"],
+      "denied": ["EXECUTE_TOOLS", "WRITE_MEMORY", "SEND_EXTERNAL_REQUESTS"],
+      "model": "phi3:mini",
+      "trust_level": "HIGH"
+    },
+    "governor": {
+      "agent_id": "AEGIS-GOV-001",
+      "scope": ["READ_TOOL_CALLS", "READ_POLICY_RULES", "BLOCK_EXECUTION", "WRITE_AUDIT_LOG"],
+      "denied": ["EXECUTE_TOOLS", "WRITE_MEMORY", "MODIFY_POLICY"],
+      "model": "mistral:7b",
+      "trust_level": "HIGH"
+    },
+    "memory_sentinel": {
+      "agent_id": "AEGIS-MEM-001",
+      "scope": ["READ_MEMORY_WRITES", "QUARANTINE_MEMORY", "READ_ALL_MEMORIES", "WRITE_AUDIT_LOG"],
+      "denied": ["EXECUTE_TOOLS", "SEND_EXTERNAL_REQUESTS", "MODIFY_POLICY"],
+      "model": "mistral:7b",
+      "trust_level": "HIGH"
+    },
+    "auditor": {
+      "agent_id": "AEGIS-AUD-001",
+      "scope": ["WRITE_AUDIT_LOG", "READ_ALL_EVENTS", "EXPORT_REPORTS"],
+      "denied": ["EXECUTE_TOOLS", "WRITE_MEMORY", "MODIFY_POLICY", "BLOCK_EXECUTION"],
+      "model": "none",
+      "trust_level": "CRITICAL"
+    }
+  }
+}

@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import Simulator from './pages/Simulator';
 import AuditLog from './pages/AuditLog';
 import Architecture from './pages/Architecture';
+import ThreatIntelligence from './pages/ThreatIntelligence';
 import Reports from './pages/Reports';
 import { useWebSocket } from './hooks/useWebSocket';
 
@@ -18,6 +19,7 @@ function App() {
           <Route path="/simulator" element={<Simulator />} />
           <Route path="/audit" element={<AuditLog />} />
           <Route path="/architecture" element={<Architecture />} />
+          <Route path="/intelligence" element={<ThreatIntelligence />} />
           <Route path="/reports" element={<Reports />} />
         </Routes>
       </Layout>

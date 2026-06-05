@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { useWebSocket } from '../hooks/useWebSocket';
-import { Bell, BarChart2, FileText } from 'lucide-react-native';
+import { Bell, BarChart2, FileText, Lock, ShieldAlert } from 'lucide-react-native';
 
 export default function Layout() {
   useWebSocket();
@@ -13,8 +13,8 @@ export default function Layout() {
         borderTopColor: '#E2E8F0',
         borderTopWidth: 1,
       },
-      tabBarActiveTintColor: '#059669',
-      tabBarInactiveTintColor: '#94A3B8'
+      tabBarActiveTintColor: '#00FF88',
+      tabBarInactiveTintColor: '#445566'
     }}>
       <Tabs.Screen 
         name="index" 
@@ -24,10 +24,24 @@ export default function Layout() {
         }} 
       />
       <Tabs.Screen 
+        name="memory" 
+        options={{
+          title: "Memory",
+          tabBarIcon: ({ color }) => <Lock size={24} color={color} />
+        }} 
+      />
+      <Tabs.Screen 
         name="stats" 
         options={{
           title: "Stats",
           tabBarIcon: ({ color }) => <BarChart2 size={24} color={color} />
+        }} 
+      />
+      <Tabs.Screen 
+        name="intel" 
+        options={{
+          title: "Intel",
+          tabBarIcon: ({ color }) => <ShieldAlert size={24} color={color} />
         }} 
       />
       <Tabs.Screen 

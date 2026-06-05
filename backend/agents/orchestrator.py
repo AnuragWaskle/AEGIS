@@ -6,6 +6,7 @@ from agents.sanitizer import SanitizerAgent
 from agents.governor import GovernorAgent
 from agents.auditor import AuditorAgent
 from agents.main_agent import ShopFlowAgent
+from agents.memory_sentinel import MemorySentinelAgent
 
 class AegisOrchestrator:
     def __init__(self):
@@ -13,6 +14,7 @@ class AegisOrchestrator:
         self.governor = GovernorAgent()
         self.auditor = AuditorAgent()
         self.main_agent = ShopFlowAgent()
+        self.memory_sentinel = MemorySentinelAgent()
 
     async def process_request(self, request: IncomingRequest) -> AegisResponse:
         request_id = str(uuid.uuid4())
@@ -61,6 +63,41 @@ class AegisOrchestrator:
                 total_processing_time_ms=int((time.time() - start_time) * 1000)
             )
             
+        # 5.5 NEW: Memory Sentinel Check
+        sentinel_result = await self.memory_sentinel.write_memory(
+            content=request.content, 
+            source=request.source, 
+            session_id=request_id
+        )
+        if sentinel_result["status"] == "BLOCKED":
+            mem_event = AuditEvent(
+                id=str(uuid.uuid4()),
+                timestamp=datetime.utcnow(),
+                event_type="MEMORY_POISONING_ATTEMPT",
+                severity=ThreatLevel.CRITICAL,
+                agent_name="MEMORY_SENTINEL",
+                input_summary=request.content[:100],
+                decision="BLOCKED",
+                details=sentinel_result
+            )
+            await self.auditor.log(mem_event, request_id)
+            audit_trail.append(mem_event)
+            try:
+                from api.websocket import broadcast
+                await broadcast({"type": "NEW_EVENT", "data": mem_event.model_dump(mode="json")})
+            except ImportError:
+                pass
+
+            return AegisResponse(
+                request_id=request_id,
+                sanitizer_decision=sanitizer_decision,
+                governor_decision=None,
+                final_status="BLOCKED",
+                main_agent_response=None,
+                audit_trail=audit_trail,
+                total_processing_time_ms=int((time.time() - start_time) * 1000)
+            )
+
         # 6. Call main agent
         clean_content = request.content
         if sanitizer_decision.threat_indicators:

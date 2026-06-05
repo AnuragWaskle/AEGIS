@@ -6,6 +6,7 @@ import uvicorn
 from api.routes_demo import router as demo_router
 from api.routes_audit import router as audit_router
 from api.routes_agent import router as agent_router
+from api.routes_intelligence import router as intel_router
 from api.websocket import router as ws_router
 from agents.auditor import AuditorAgent
 
@@ -29,6 +30,7 @@ app.add_middleware(
 app.include_router(demo_router, prefix="/api/demo")
 app.include_router(audit_router, prefix="/api/audit")
 app.include_router(agent_router, prefix="/api/agent")
+app.include_router(intel_router, prefix="/api/intelligence")
 app.include_router(ws_router)
 
 @app.exception_handler(Exception)

@@ -5,6 +5,8 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LineCh
 import { Shield, ShieldAlert, Activity, Clock, CheckCircle } from 'lucide-react';
 import axios from 'axios';
 import useAegisStore from '../store/aegisStore';
+import MemorySentinelPanel from '../components/dashboard/MemorySentinelPanel';
+import MitreAtlasBadge from '../components/shared/MitreAtlasBadge';
 
 // Animated counter hook
 function useCountUp(target, duration = 1200) {
@@ -191,6 +193,11 @@ export default function Dashboard() {
                   <p className="text-xs text-aegis-text-secondary truncate font-mono">
                     {String(event.input_summary || '').slice(0, 90)}
                   </p>
+                  {event.decision === 'BLOCKED' && event.threat_type && (
+                    <div className="mt-2">
+                      <MitreAtlasBadge attackType={event.threat_type} />
+                    </div>
+                  )}
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -229,6 +236,10 @@ export default function Dashboard() {
               </div>
             );
           })}
+          
+          <div className="mt-2">
+            <MemorySentinelPanel />
+          </div>
         </div>
       </div>
 

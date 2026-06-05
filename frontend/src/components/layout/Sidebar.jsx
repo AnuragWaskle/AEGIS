@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Shield, LayoutDashboard, Zap, FileText, Network, Download } from 'lucide-react';
+import { Shield, LayoutDashboard, Zap, FileText, Network, Download, ShieldAlert } from 'lucide-react';
 import useAegisStore from '../../store/aegisStore';
 
 export default function Sidebar() {
@@ -10,6 +10,7 @@ export default function Sidebar() {
     { to: '/simulator', icon: Zap, label: 'Simulator' },
     { to: '/audit', icon: FileText, label: 'Audit Log' },
     { to: '/architecture', icon: Network, label: 'Architecture' },
+    { to: '/intelligence', icon: ShieldAlert, label: 'Threat Intel' },
     { to: '/reports', icon: Download, label: 'Reports' },
   ];
 
