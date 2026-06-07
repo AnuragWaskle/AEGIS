@@ -1,30 +1,136 @@
 # 🛡️ AEGIS — Agentic Immune System
 
-## Project Overview
+> **A layered cybersecurity defense system that protects AI agents from indirect prompt injection attacks in the Agentic Web.**
 
-Aegis is an **Agentic Immune System** — a security middleware layer that sits between an AI agent and the outside world. It is a swarm of three specialized micro-agents that work together to prevent the most dangerous class of AI attacks: **Indirect Prompt Injection**.
+---
 
-As AI agents are deployed to read emails, browse websites, and query databases, they are vulnerable to blindly trusting malicious instructions embedded in documents. Aegis acts as an intelligent firewall, neutralizing threats before they reach the main agent, and verifying actions before they are executed.
+## Project Description
 
-## Core Architecture: The Three Agents
+AI agents that read emails, resumes, and web pages are vulnerable to **indirect prompt injection** — a class of attack where malicious instructions are hidden inside content to hijack agent behavior. AEGIS acts as an intelligent security middleware that intercepts, inspects, and governs every input and action before any damage can occur.
 
-1. **The Sanitizer (Pre-Execution Guard)**
-   Intercepts all inbound data *before* the main agent reads it. It uses a fast model (like Microsoft Phi-3 Mini) to detect and neutralize prompt injections, Unicode tricks, role-play overrides, and hidden commands.
-   
-2. **The Governor (Post-Reasoning Guard)**
-   Intercepts EVERY tool call proposed by the main agent *before* execution. It evaluates Role-Based Access Control (RBAC) policies, calculates the "Blast Radius" of the action, and blocks or flags high-risk behaviors using deterministic rules and AI anomaly detection.
-   
-3. **The Auditor (Always-Running Background Agent)**
-   Silently maintains an immutable SQLite log of every event, prompt, decision, and block. It provides a real-time WebSocket feed to the dashboard and generates exportable compliance reports.
+**What AEGIS prevents:** data leakage · unauthorized tool execution · fraudulent operations · policy bypass · agent hijacking
 
-## Tech Stack
+---
 
-* **Backend:** Python 3.11, FastAPI, Ollama (Phi-3 Mini, Llama 3.1 8B, Mistral 7B), LangGraph, SQLite, WebSockets
-* **Frontend:** React 18 + Vite, TailwindCSS v3, Recharts, Zustand
-* **Mobile App:** React Native + Expo, NativeWind
+## How AEGIS Works
 
-## Features
+```
+Untrusted Input → [Sanitizer] → Main Agent → [Governor] → Tool Execution → [Auditor] → Dashboard
+```
 
-* **Attack Simulator:** A split-screen demo showcasing an unprotected agent executing a malicious command vs. Aegis intercepting and blocking the same attack.
-* **Live Security Dashboard:** Real-time threat feed, threat gauge, agent status, and key metrics.
-* **Forensic Audit Log:** A complete, tamper-proof trail of all agent activities and security events.
+Three specialized micro-agents form the defense pipeline:
+
+- **🔍 Sanitizer** — Scans all inbound content *before* the agent reads it. Detects injections, Unicode tricks, hidden commands, and role-play overrides.
+- **⚖️ Governor** — Intercepts every proposed tool call, enforces RBAC policies, calculates a **Blast Radius score (0–100)**, and blocks high-risk actions.
+- **📋 Auditor** — Runs silently in the background, logging every event to an immutable SQLite database and streaming real-time alerts to the dashboard via WebSocket.
+
+---
+
+## Architecture Overview
+
+| Layer | Technology | Purpose |
+|---|---|---|
+| Input Guard | Phi-3 Mini (Ollama) | Adversarial content classification |
+| Orchestration | LangGraph | Multi-agent pipeline coordination |
+| Policy Engine | Python + RBAC JSON | Deterministic action enforcement |
+| Audit Store | SQLite (aiosqlite) | Immutable forensic event log |
+| API Layer | FastAPI + WebSocket | Real-time backend communication |
+| Dashboard | React 19 + Recharts | Live threat visualization |
+
+---
+
+## AI Tools Used
+
+| Model / Framework | Role |
+|---|---|
+| **Microsoft Phi-3 Mini** (via Ollama) | Sanitizer — fast adversarial content detection |
+| **Llama 3.1 8B** (via Ollama) | Main agent reasoning |
+| **Mistral 7B** (via Ollama) | Governor — structured intent classification |
+| **LangGraph** | Multi-agent orchestration and pipeline control |
+| **LangChain Core / Community** | Agent tooling and prompt management |
+
+> All models run **locally via Ollama** — no external API keys required.
+
+---
+
+## Setup Instructions
+
+### Prerequisites
+- Python 3.11+, Node.js 18+, [Ollama](https://ollama.com) installed
+
+### 1 — Pull AI Models
+```bash
+ollama pull phi3:mini
+ollama pull llama3.1:8b
+ollama pull mistral:7b
+```
+
+### 2 — Backend
+```bash
+cd backend
+python -m venv venv
+venv\Scripts\activate          # Windows
+pip install -r requirements.txt
+cp .env.example .env           # Configure as needed
+python main.py                 # Runs on http://localhost:8001
+```
+
+### 3 — Frontend
+```bash
+cd frontend
+npm install
+npm run dev                    # Runs on http://localhost:5173
+```
+
+---
+
+## Dependencies
+
+**Backend (Python)**
+
+| Package | Version | Purpose |
+|---|---|---|
+| `fastapi` | ≥0.111.0 | REST API framework |
+| `uvicorn[standard]` | ≥0.29.0 | ASGI server |
+| `websockets` | ≥12.0 | Real-time WebSocket support |
+| `langgraph` | ≥0.1.1 | Multi-agent orchestration |
+| `langchain-core` | ≥0.3.0 | Agent and prompt tooling |
+| `langchain-community` | ≥0.3.0 | Community integrations |
+| `aiosqlite` | 0.20.0 | Async SQLite audit database |
+| `pydantic` | ≥2.9.0 | Data validation and schemas |
+| `httpx` | ≥0.27.0 | Async HTTP client |
+| `reportlab` | 4.2.0 | PDF compliance report generation |
+| `python-dotenv` | ≥1.0.1 | Environment configuration |
+
+**Frontend (Node.js)**
+
+| Package | Version | Purpose |
+|---|---|---|
+| `react` | ^19.2 | UI framework |
+| `vite` | ^8.0 | Build tool and dev server |
+| `tailwindcss` | ^4.3 | Utility-first styling |
+| `zustand` | ^5.0 | Lightweight state management |
+| `socket.io-client` | ^4.8 | WebSocket real-time updates |
+| `recharts` | ^3.8 | Security metrics visualization |
+| `framer-motion` | ^12.4 | Animations and transitions |
+| `react-router-dom` | ^7.17 | Client-side routing |
+| `axios` | ^1.17 | HTTP API client |
+
+**Runtime**
+
+- [Ollama](https://ollama.com) — local LLM inference engine
+- Python 3.11+
+- Node.js 18+
+
+---
+
+## Team Details
+
+| Name | Role |
+|---|---|
+| **Member 1** | Full Stack Developer — Frontend (React dashboard, simulator UI), backend APIs, WebSocket integration, deployment |
+| **Member 2** | AI Engineer — Sanitizer pipeline, Governor logic, LangGraph orchestration, Ollama model integration |
+
+---
+
+*AEGIS — Making agentic AI trustworthy, one blocked injection at a time.*
