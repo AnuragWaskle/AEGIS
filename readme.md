@@ -126,10 +126,16 @@ npm run dev                    # Runs on http://localhost:5173
 
 ## Team Details
 
-| Name | Role |
-|---|---|
-| **Member 1** | Full Stack Developer — Frontend (React dashboard, simulator UI), backend APIs, WebSocket integration, deployment |
-| **Member 2** | AI Engineer — Sanitizer pipeline, Governor logic, LangGraph orchestration, Ollama model integration |
+<table style="width: 100%; border-collapse: collapse; text-align:center;">
+    <tr>
+        <th><a href="https://github.com/AnuragWaskle">Anurag Waskle</a></th>
+        <th><a href="https://github.com/purvapatidar30-x">Purva</a></th>
+    </tr>
+    <tr>
+        <td><img src="https://avatars.githubusercontent.com/AnuragWaskle" alt="Anurag Waskle"></td>
+        <td><img src="https://avatars.githubusercontent.com/purvapatidar30-x" alt="Purva"></td>
+    </tr>
+</table>
 
 ---
 
