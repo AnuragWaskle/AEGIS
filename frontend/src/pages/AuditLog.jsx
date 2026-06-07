@@ -56,7 +56,7 @@ export default function AuditLog() {
     setLoading(true);
     try {
       const query = buildQuery();
-      const res = await axios.get(`http://localhost:8001/api/audit/events?${query}`);
+      const res = await axios.get(`https://aegis-backend-idbk.onrender.com/api/audit/events?${query}`);
       let data = res.data;
 
       // Client-side date-to filter (since API only has since=)
@@ -90,7 +90,7 @@ export default function AuditLog() {
 
   const toggleRow = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
 
-  const downloadFile = (type) => window.open(`http://localhost:8001/api/audit/export/${type}`, '_blank');
+  const downloadFile = (type) => window.open(`https://aegis-backend-idbk.onrender.com/api/audit/export/${type}`, '_blank');
 
   const handleSearch = (e) => {
     e.preventDefault();

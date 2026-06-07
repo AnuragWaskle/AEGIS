@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:8001';
+const API_BASE = 'https://aegis-backend-idbk.onrender.com';
 
 /**
  * useAgentStatus — polls /api/agent/status every 10 seconds.

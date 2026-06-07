@@ -14,7 +14,7 @@ export default function Reports() {
   React.useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get('http://localhost:8001/api/audit/stats');
+        const res = await axios.get('https://aegis-backend-idbk.onrender.com/api/audit/stats');
         setStats({ blocked: res.data.blocked_count, total: res.data.total_events });
       } catch (e) {
         console.error(e);
@@ -45,14 +45,14 @@ export default function Reports() {
   }, [events]);
 
   const handleDownload = (type) => {
-    window.open(`http://localhost:8001/api/audit/export/${type}`, '_blank');
+    window.open(`https://aegis-backend-idbk.onrender.com/api/audit/export/${type}`, '_blank');
   };
 
   const clearLogs = async () => {
     if (confirm("Are you sure you want to clear all audit logs? This cannot be undone.")) {
       setIsClearing(true);
       try {
-        await axios.delete('http://localhost:8001/api/audit/clear');
+        await axios.delete('https://aegis-backend-idbk.onrender.com/api/audit/clear');
         alert("Audit logs cleared successfully.");
         window.location.reload();
       } catch (e) {

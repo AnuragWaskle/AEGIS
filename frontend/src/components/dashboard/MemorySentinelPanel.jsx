@@ -16,7 +16,7 @@ export default function MemorySentinelPanel() {
 
   const fetchStats = async () => {
     try {
-      const res = await axios.get('http://localhost:8001/api/audit/memory/stats');
+      const res = await axios.get('https://aegis-backend-idbk.onrender.com/api/audit/memory/stats');
       setStats(res.data);
     } catch (e) {
       console.error('Failed to fetch memory stats', e);
@@ -25,7 +25,7 @@ export default function MemorySentinelPanel() {
 
   const fetchQuarantine = async () => {
     try {
-      const res = await axios.get('http://localhost:8001/api/audit/memory/quarantine');
+      const res = await axios.get('https://aegis-backend-idbk.onrender.com/api/audit/memory/quarantine');
       setQuarantineFeed(res.data.slice(0, 5));
     } catch (e) {
       console.error('Failed to fetch quarantine feed', e);
@@ -45,7 +45,7 @@ export default function MemorySentinelPanel() {
   const handleRunAudit = async () => {
     setIsAuditing(true);
     try {
-      const res = await axios.post('http://localhost:8001/api/audit/memory/audit');
+      const res = await axios.post('https://aegis-backend-idbk.onrender.com/api/audit/memory/audit');
       setAuditResult(res.data);
     } catch (e) {
       console.error('Failed to run audit', e);

@@ -163,7 +163,7 @@ export default function Simulator() {
   const [cves, setCves] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:8001/api/intelligence/cves').then(res => {
+    axios.get('https://aegis-backend-idbk.onrender.com/api/intelligence/cves').then(res => {
       setCves(res.data || []);
     }).catch(e => console.error(e));
   }, []);
@@ -189,8 +189,8 @@ export default function Simulator() {
     try {
       // Simulate step-by-step reveal
       const [vulnRes, aegisRes] = await Promise.all([
-        axios.post('http://localhost:8001/api/demo/process?mode=vulnerable', payload),
-        axios.post('http://localhost:8001/api/demo/process', payload)
+        axios.post('https://aegis-backend-idbk.onrender.com/api/demo/process?mode=vulnerable', payload),
+        axios.post('https://aegis-backend-idbk.onrender.com/api/demo/process', payload)
       ]);
       setActiveStep(2);
       setTimeout(() => setActiveStep(3), 600);

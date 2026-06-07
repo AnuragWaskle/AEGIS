@@ -11,7 +11,7 @@ export default function MitreAtlasBadge({ attackType }) {
     
     const fetchData = async () => {
       try {
-        const res = await axios.get(`http://localhost:8001/api/intelligence/mitre/${attackType}`);
+        const res = await axios.get(`https://aegis-backend-idbk.onrender.com/api/intelligence/mitre/${attackType}`);
         setAtlasData(res.data);
       } catch (e) {
         console.error('Failed to fetch MITRE ATLAS data', e);
