@@ -15,10 +15,10 @@ export default function ThreatIntelligence() {
     const fetchData = async () => {
       try {
         const [sumRes, owaspRes, cvesRes, idenRes] = await Promise.all([
-          axios.get('http://localhost:8001/api/intelligence/coverage-summary'),
-          axios.get('http://localhost:8001/api/intelligence/owasp'),
-          axios.get('http://localhost:8001/api/intelligence/cves'),
-          axios.get('http://localhost:8001/api/intelligence/agent-identities')
+          axios.get('https://aegis-backend-idbk.onrender.com/api/intelligence/coverage-summary'),
+          axios.get('https://aegis-backend-idbk.onrender.com/api/intelligence/owasp'),
+          axios.get('https://aegis-backend-idbk.onrender.com/api/intelligence/cves'),
+          axios.get('https://aegis-backend-idbk.onrender.com/api/intelligence/agent-identities')
         ]);
         setSummary(sumRes.data);
         setOwasp(owaspRes.data);

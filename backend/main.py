@@ -1,4 +1,5 @@
 import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -17,7 +18,12 @@ from datetime import datetime
 from models.schemas import AuditEvent, ThreatLevel
 import traceback
 
-app = FastAPI(title="Aegis — Agentic Immune System API", version="2.0.0")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    AuditorAgent()  # Initializes SQLite database on startup
+    yield
+
+app = FastAPI(title="Aegis — Agentic Immune System API", version="2.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -63,9 +69,7 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"error": "Internal Server Error", "message": error_msg},
     )
 
-@app.on_event("startup")
-async def startup_event():
-    AuditorAgent()  # Initializes SQLite database on startup
+
 
 @app.get("/health")
 async def health_check():

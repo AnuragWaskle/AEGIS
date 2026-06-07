@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:8001';
+const API_BASE = 'https://aegis-backend-idbk.onrender.com';
 
 /**
  * useAuditLog — fetches audit events with filter params and auto-refreshes.

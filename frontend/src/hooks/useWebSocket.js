@@ -13,7 +13,7 @@ export function useWebSocket() {
     const connect = () => {
       if (reconnectAttempts.current >= 5) return;
       
-      const ws = new WebSocket('ws://localhost:8001/ws');
+      const ws = new WebSocket('wss://aegis-backend-idbk.onrender.com/ws');
       wsRef.current = ws;
 
       ws.onopen = () => {

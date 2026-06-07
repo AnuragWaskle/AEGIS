@@ -73,7 +73,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get('http://localhost:8001/api/audit/stats');
+        const res = await axios.get('https://aegis-backend-idbk.onrender.com/api/audit/stats');
         const d = res.data;
         setStats({
           blocked: d.blocked_count ?? 0,
